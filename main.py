@@ -9,7 +9,7 @@ if __name__ == '__main__':
     serverinfo  = Server.Start()
     '''ロガーの起動'''
     # Loggerを起動してPIDを取得
-    proc = subprocess.Popen([sys.executable, 'Logger/main.py'])
+    proc = subprocess.Popen(["python", "-m", 'Logger.main'])
     pids["logger"] = proc.pid
     # 必要ならログやサーバーに通知
     Server.send(serverinfo, "logger", "info", "BSW", "Server started")

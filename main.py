@@ -1,5 +1,4 @@
 from Server import server as Server
-from HeartBeat import main as HeatBeat
 import time
 import psutil
 import subprocess
@@ -21,7 +20,9 @@ def start_process():
     '''ロガーの起動'''
     pids["logger"] = boot_process("logger", "Logger.main")
     '''UIアプリの起動'''
-    #pids["uiapp"] = boot_process("uiapp", "UIApp.main")
+    pids["uiapp"] = boot_process("uiapp", "UIApp.main")
+    '''アップデートモニターの起動'''
+    pids["updatemonitor"] = boot_process("updatemonitor", "UpdateMonitor.main")
     return pids
 
 

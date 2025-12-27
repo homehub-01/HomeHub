@@ -21,7 +21,8 @@ if __name__ == '__main__':
                 elif msg == "HEARTBEAT":
                     client.send("heartbeat", "ALIVE","logger")
             elif len(msg.split(',')) >= 3:
-                msgtype,proc, content = msg.split(',')
+                msgsplit = msg.split(',')
+                msgtype,proc, content = msgsplit[0], msgsplit[1], ','.join(msgsplit[2:])
                 # ログメッセージを書き込む
                 if msgtype == "error":
                     logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[ERROR]," + proc + "," + content + "\n")

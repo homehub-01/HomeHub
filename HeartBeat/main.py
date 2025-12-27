@@ -53,7 +53,7 @@ if __name__ == '__main__':
                     del processes[process]
                     del responses[process]
                     break
-            except Exception:
+            except Exception as e:
                 continue
             # ハートビートメッセージを送信
             client.send(process, "HEARTBEAT")

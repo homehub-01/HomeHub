@@ -89,15 +89,15 @@ def sorting(serverinfo: ServeInfo):
                     serverinfo.addrsbook[fromprocess] = conn
                 elif serverinfo.addrsbook[fromprocess] is not conn:
                     serverinfo.addrsbook[fromprocess] = conn
-
+                
                 # 送信先が登録されていれば送信キューへ
-                if toprocess in serverinfo.addrsbook:
+                if toprocess == "server":
+                    serverinfo.me_rx_queue.put((fromprocess, command))
+                elif toprocess in serverinfo.addrsbook:
                     serverinfo.tx_queue.put((serverinfo.addrsbook[toprocess], command))
                 elif toprocess == "-":
                     pass
-                elif toprocess == "server":
-                    # サーバー宛なら自分で処理（未実装）
-                    serverinfo.me_rx_queue.put((fromprocess, command))
+                
                 else:
                     # 未登録なら後ろへ戻す（短い遅延を入れて無限ループを避ける）
                     time.sleep(0.05)

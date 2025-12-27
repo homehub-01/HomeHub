@@ -146,7 +146,7 @@ class Client:
                         pass
                     self._sock = None
 
-                if not self.reconnect:
-                    break
+            if not self.reconnect:
+                break
                 # 再接続まで待つ
-                time.sleep(1.0)
+            time.sleep(1.0)

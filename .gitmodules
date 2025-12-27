@@ -1,0 +1,3 @@
+[submodule "UIAPP"]
+	path = UIAPP
+	url = https://github.com/homehub-01/UIApp-HomeHub.git

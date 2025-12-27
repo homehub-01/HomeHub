@@ -7,6 +7,7 @@ class ServeInfo:
     server = None
     rx_queue = queue.Queue()
     tx_queue = queue.Queue()
+    me_rx_queue = queue.Queue()
     addrsbook = {"server": None}   # process_name -> conn
 
 def Start():
@@ -94,6 +95,9 @@ def sorting(serverinfo: ServeInfo):
                     serverinfo.tx_queue.put((serverinfo.addrsbook[toprocess], command))
                 elif toprocess == "-":
                     pass
+                elif toprocess == "server":
+                    # サーバー宛なら自分で処理（未実装）
+                    serverinfo.me_rx_queue.put((fromprocess, command))
                 else:
                     # 未登録なら後ろへ戻す（短い遅延を入れて無限ループを避ける）
                     time.sleep(0.05)

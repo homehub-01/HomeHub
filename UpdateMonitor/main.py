@@ -40,13 +40,17 @@ if __name__ == "__main__":
     reloadtime = 0
     threads = queue.Queue()
     updateflag = True
+    forced_update = False
     while True:
         if not client._rx_queue.empty():
             msg = client._rx_queue.get()
             if len(msg.split(',')) == 1:
                 if msg == "HEARTBEAT":
                     client.send("heartbeat", "ALIVE","updatemonitor")
-        if time.time() - reloadtime > 300:
+                elif msg == "update":
+                    forced_update = True
+        if time.time() - reloadtime > 1500 or forced_update:
+            forced_update = False
             reloadtime = time.time()
             while not threads.empty():
                 thread = threads.get()

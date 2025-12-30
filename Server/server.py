@@ -104,4 +104,4 @@ def sorting(serverinfo: ServeInfo):
                     serverinfo.rx_queue.put((message, conn))
         except Exception:
             pass
-        time.sleep(0.001)
+        time.sleep(0.01)

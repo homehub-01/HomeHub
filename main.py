@@ -56,5 +56,5 @@ if __name__ == '__main__':
                         Server.send(serverinfo, "logger", "error", "BSW", f"Failed to terminate process {process}: {e}")
                 time.sleep(2)
                 pids = start_process()
-        time.sleep(0.1)
+        time.sleep(0.5)
 

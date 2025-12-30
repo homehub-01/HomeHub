@@ -1,3 +1,6 @@
 [submodule "UIAPP"]
 	path = UIAPP
 	url = https://github.com/homehub-01/UIApp-HomeHub.git
+[submodule "RemoteControl"]
+	path = RemoteControl
+	url = https://github.com/homehub-01/RemoteControl-HomeHub.git

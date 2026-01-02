@@ -12,7 +12,7 @@ class AppInfo:
 
 def update_from_git(appinfo, repo_path):
     """指定されたリポジトリの最新のコミットハッシュを取得する"""
-    subprocess.run(["git","-C", repo_path, "fetch"])
+    subprocess.run(["git","fetch"])
     result = subprocess.run(
         ["git", "-C", repo_path, "rev-parse", "origin/develop"],
         capture_output=True,
@@ -24,7 +24,7 @@ def update_from_git(appinfo, repo_path):
     latest_hash = result.stdout.strip()
     client.send("logger", "debug", "UPDATEMONITOR", f"Latest git hash for {repo_path} is {latest_hash}")
     if appinfo.apphash.get(repo_path, "") != latest_hash:
-        result = subprocess.run(["git","-C", repo_path, "pull"], capture_output=True, text=True)
+        result = subprocess.run(["git","submodule","update", "--remote", repo_path], capture_output=True, text=True)
         client.send("logger", "info", "UPDATEMONITOR", f"Pulled latest changes for {repo_path}: {result.stdout.strip()}")
         appinfo.apphash[repo_path] = latest_hash
         appinfo.rebootrequired = True

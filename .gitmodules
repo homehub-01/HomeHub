@@ -1,9 +1,12 @@
 [submodule "UIApp"]
 	path = UIApp
 	url = https://github.com/homehub-01/UIApp-HomeHub.git
+	branch = develop
 [submodule "RemoteControl"]
 	path = RemoteControl
 	url = https://github.com/homehub-01/RemoteControl-HomeHub.git
+	branch = develop
 [submodule "HomeBridge"]
 	path = HomeBridge
 	url = https://github.com/homehub-01/HomeBridge-HomeHub.git
+	branch = develop

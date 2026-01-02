@@ -24,7 +24,8 @@ def update_from_git(appinfo, repo_path):
     latest_hash = result.stdout.strip()
     client.send("logger", "debug", "UPDATEMONITOR", f"Latest git hash for {repo_path} is {latest_hash}")
     if appinfo.apphash.get(repo_path, "") != latest_hash:
-        subprocess.run(["git","-C", repo_path, "pull"])
+        result = subprocess.run(["git","-C", repo_path, "pull"], capture_output=True, text=True)
+        client.send("logger", "info", "UPDATEMONITOR", f"Pulled latest changes for {repo_path}: {result.stdout.strip()}")
         appinfo.apphash[repo_path] = latest_hash
         appinfo.rebootrequired = True
         client.send("logger", "info", "UPDATEMONITOR", f"App {repo_path} updated to hash {latest_hash}. Reboot required.")

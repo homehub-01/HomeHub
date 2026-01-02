@@ -12,7 +12,7 @@ class AppInfo:
 
 def update_from_git(appinfo, repo_path):
     """指定されたリポジトリの最新のコミットハッシュを取得する"""
-    subprocess.run(["git","fetch"])
+    subprocess.run(["git","-C", repo_path, "fetch"])
     result = subprocess.run(
         ["git", "-C", repo_path, "rev-parse", "origin/develop"],
         capture_output=True,

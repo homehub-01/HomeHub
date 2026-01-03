@@ -40,6 +40,7 @@ if __name__ == '__main__':
         # サーバー自身の受信キューをチェック
         if not serverinfo.me_rx_queue.empty():
             fromprocess, command = serverinfo.me_rx_queue.get()
+            Server.send(serverinfo, "logger", "info", "BSW", f"Received command from {fromprocess}: {command}")
             if command[0] == "REBOOT":
                 # 全プロセスを再起動する
                 Server.send(serverinfo, "logger", "info", "BSW", f"Rebooting all processes as requested by {fromprocess}")

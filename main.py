@@ -23,6 +23,8 @@ def start_process():
     pids["uiapp"] = boot_process("uiapp", "UIApp.main")
     '''アップデートモニターの起動'''
     pids["updatemonitor"] = boot_process("updatemonitor", "UpdateMonitor.main")
+    '''リモートコントローラの起動'''
+    pids["remotecontrol"] = boot_process("remotecontrol", "RemoteControl.main")
     return pids
 
 

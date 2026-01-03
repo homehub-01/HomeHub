@@ -25,6 +25,8 @@ def start_process():
     pids["updatemonitor"] = boot_process("updatemonitor", "UpdateMonitor.main")
     '''リモートコントローラの起動'''
     pids["remotecontrol"] = boot_process("remotecontrol", "RemoteControl.main")
+    '''ホームブリッジの起動'''
+    pids["homebridge"] = boot_process("homebridge", "HomeBridge.main")
     return pids
 
 

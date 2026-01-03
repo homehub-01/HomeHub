@@ -32,11 +32,10 @@ if __name__ == '__main__':
                 procname = parts[1]
                 if msgtype == "ALIVE":
                     responses[procname] = time.time()
-                    client.send("logger", "debug", "HEARTBEAT", f"Received ALIVE from {procname}")
         
         for response in responses.keys():
             # 応答が一定時間(15s)ないプロセスを削除
-            if time.time() - responses[response] > 5*12:
+            if time.time() - responses[response] > 6*5:
                 # サーバーに対して再起動要求を送信
                 client.send("logger", "warning", "HEARTBEAT", f"No response from {response} for 15s. Requesting reboot.")
                 client.send("server", "REBOOT") 
@@ -57,5 +56,6 @@ if __name__ == '__main__':
                 continue
             # ハートビートメッセージを送信
             client.send(process, "HEARTBEAT")
+            time.sleep(0.2)
         
         time.sleep(5)

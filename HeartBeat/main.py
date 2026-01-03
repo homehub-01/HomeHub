@@ -36,7 +36,7 @@ if __name__ == '__main__':
         
         for response in responses.keys():
             # 応答が一定時間(15s)ないプロセスを削除
-            if time.time() - responses[response] > 5*3:
+            if time.time() - responses[response] > 5*12:
                 # サーバーに対して再起動要求を送信
                 client.send("logger", "warning", "HEARTBEAT", f"No response from {response} for 15s. Requesting reboot.")
                 client.send("server", "REBOOT") 

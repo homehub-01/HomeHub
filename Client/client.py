@@ -36,9 +36,12 @@ class Client:
         self._stop_ev = threading.Event()
         # 受信保持用キュー（ここで受信データを保持する）
         self._rx_queue = queue.Queue()
+        self._tx_queue = queue.Queue()
         # 受信スレッドをコンストラクタで起動
         self._recv_thread = threading.Thread(target=self._receiver_loop, daemon=True)
         self._recv_thread.start()
+        self._send_thread = threading.Thread(target=self._send_loop, daemon=True)
+        self._send_thread.start()
 
     def __repr__(self):
         return f"Client(process={self.process!r}, host={self.host!r}, port={self.port!r})"
@@ -68,36 +71,38 @@ class Client:
                     pass
                 self._sock = None
                 return False
-
-    def send(self, toprocess, *args, timeout=5.0):
-        """
-        同期的に送信する。接続がなければ接続を試みる（timeout 秒待つ）。
-        引数は文字列化してカンマ区切りで送信する。
-        例: send("other", "CMD", "arg1")
-        戻り値: True=送信成功, False=失敗
-        """
-        deadline = time.time() + timeout
-        # 接続を確立する試行
-        while time.time() < deadline:
-            if self._ensure_connected():
-                break
-            time.sleep(0.2)
-        else:
-            return False
-
-        payload = ','.join([str(self.process), str(toprocess)] + [str(a) for a in args]) + "\\SPLIT"
-        with self._lock:
-            try:
-                self._sock.sendall(payload.encode())
-                return True
-            except Exception:
-                try:
-                    self._sock.close()
-                except Exception:
+            
+    def _send_loop(self):
+        while True:
+            if not self._tx_queue.empty():
+                """
+                同期的に送信する。接続がなければ接続を試みる（timeout 秒待つ）。
+                引数は文字列化してカンマ区切りで送信する。
+                例: send("other", "CMD", "arg1")
+                戻り値: True=送信成功, False=失敗
+                """
+                deadline = time.time() + 5.0
+                # 接続を確立する試行
+                while time.time() < deadline:
+                    if self._ensure_connected():
+                        break
+                    time.sleep(0.2)
+                else:
                     pass
-                self._sock = None
-                return False
+                try:
+                    payload = self._tx_queue.get()
+                    self._sock.sendall(payload.encode())
+                except Exception:
+                    try:
+                        self._sock.close()
+                    except Exception:
+                        pass
+                    self._sock = None
 
+    def send(self, toprocess, *args):
+        payload = ','.join([str(self.process), str(toprocess)] + [str(a) for a in args]) + "\\SPLIT"
+        self._tx_queue.put(payload)
+        
     def close(self):
         """明示的にクローズして受信スレッドを停止する"""
         self._stop_ev.set()

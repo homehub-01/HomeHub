@@ -34,9 +34,14 @@ if __name__ == '__main__':
                     logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[INFO]," + proc + "," + content + "\n")
                     logfile.flush()
                 elif msgtype == "debug1":
-                    pass
-                    #logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[DEBUG]," + proc + "," + content + "\n")
-                    #logfile.flush()
+                    logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[DEBUG1]," + proc + "," + content + "\n")
+                    logfile.flush()
+                elif msgtype == "debug2":
+                    logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[DEBUG2]," + proc + "," + content + "\n")
+                    logfile.flush()
+                else:
+                    logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[UNKNOWN]," + proc + "," + content + "\n")
+                    logfile.flush()
                 
         time.sleep(0.1)
             

@@ -26,15 +26,19 @@ if __name__ == '__main__':
                 # ログメッセージを書き込む
                 if msgtype == "error":
                     logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[ERROR]," + proc + "," + content + "\n")
+                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[ERROR]," + proc + "," + content + "\n")
                     logfile.flush()
                 elif msgtype == "warning":
                     logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[WARNING]," + proc + "," + content + "\n")
+                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[WARNING]," + proc + "," + content + "\n")
                     logfile.flush()
                 elif msgtype == "info":
                     logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[INFO]," + proc + "," + content + "\n")
+                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[INFO]," + proc + "," + content + "\n")
                     logfile.flush()
                 elif msgtype == "debug1":
                     logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[DEBUG1]," + proc + "," + content + "\n")
+                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[DEBUG1]," + proc + "," + content + "\n")
                     logfile.flush()
                 elif msgtype == "debug2":
                     logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[DEBUG2]," + proc + "," + content + "\n")

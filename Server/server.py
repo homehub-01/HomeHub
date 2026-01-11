@@ -77,7 +77,11 @@ def sorting(serverinfo: ServeInfo):
         try:
             if not serverinfo.rx_queue.empty():
                 message, conn = serverinfo.rx_queue.get()
-                parts = message.split(',')
+                sp_message = message.split("\\SPLIT\\")
+                if len(sp_message) > 1:
+                    for i in range(1, len(sp_message),1):
+                        serverinfo.rx_queue.put(sp_message[i])
+                parts = sp_message[0].split(',')
                 if len(parts) < 2:
                     continue
                 fromprocess = parts[0]

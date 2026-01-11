@@ -45,6 +45,7 @@ if __name__ == '__main__':
                     logfile.flush()
                 else:
                     logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[UNKNOWN]," + proc + "," + content + "\n")
+                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[UNKNOWN]," + proc + "," + content + "\n")
                     logfile.flush()
                 
         time.sleep(0.1)

@@ -56,7 +56,7 @@ class Client:
                 self._sock = s
                 # 登録メッセージを送る（必要に応じてフォーマットを合わせる）
                 try:
-                    reg = f"{self.process},-,HELLO"
+                    reg = f"{self.process},-,HELLO" + r"\\SPLIT\\"
                     self._sock.sendall(reg.encode())
                 except Exception:
                     pass
@@ -85,7 +85,7 @@ class Client:
         else:
             return False
 
-        payload = ','.join([str(self.process), str(toprocess)] + [str(a) for a in args])
+        payload = ','.join([str(self.process), str(toprocess)] + [str(a) for a in args]) + r"\\SPLIT\\"
         with self._lock:
             try:
                 self._sock.sendall(payload.encode())

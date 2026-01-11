@@ -77,7 +77,7 @@ def sorting(serverinfo: ServeInfo):
         try:
             if not serverinfo.rx_queue.empty():
                 message, conn = serverinfo.rx_queue.get()
-                sp_message = message.split("\\SPLIT\\")
+                sp_message = message.split("\\SPLIT")
                 if len(sp_message) > 1:
                     for i in range(1, len(sp_message),1):
                         serverinfo.rx_queue.put(sp_message[i])
@@ -87,9 +87,7 @@ def sorting(serverinfo: ServeInfo):
                 fromprocess = parts[0]
                 toprocess = parts[1]
                 command = parts[2:]
-                if fromprocess != "heartbeat" or toprocess != "heartbeat":
-                    with open("test.txt", "a") as f:
-                        f.write(sp_message[0]+"\n")
+
                 # 初めてのプロセスなら登録、既に異なるコネクションなら更新
                 if fromprocess not in serverinfo.addrsbook:
                     serverinfo.addrsbook[fromprocess] = conn

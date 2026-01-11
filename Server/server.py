@@ -87,7 +87,9 @@ def sorting(serverinfo: ServeInfo):
                 fromprocess = parts[0]
                 toprocess = parts[1]
                 command = parts[2:]
-
+                if fromprocess != "heartbeat" or toprocess != "heartbeat":
+                    with open("test.txt", "a") as f:
+                        f.write(sp_message[0]+"\n")
                 # 初めてのプロセスなら登録、既に異なるコネクションなら更新
                 if fromprocess not in serverinfo.addrsbook:
                     serverinfo.addrsbook[fromprocess] = conn

@@ -22,7 +22,7 @@ def update_from_git(appinfo, repo_path):
         client.send("logger", "error", "UPDATEMONITOR", f"Failed to get git hash for {repo_path}: {result.stderr.strip()}")
         return
     latest_hash = result.stdout.strip()
-    client.send("logger", "debug", "UPDATEMONITOR", f"Latest git hash for {repo_path} is {latest_hash}")
+    client.send("logger", "debug1", "UPDATEMONITOR", f"Latest git hash for {repo_path} is {latest_hash}")
     if appinfo.apphash.get(repo_path, "") != latest_hash:
         result = subprocess.run(["git","submodule","update", "--remote", repo_path], capture_output=True, text=True)
         client.send("logger", "info", "UPDATEMONITOR", f"Pulled latest changes for {repo_path}: {result.stdout.strip()}")

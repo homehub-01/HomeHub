@@ -33,7 +33,7 @@ if __name__ == '__main__':
                 elif msgtype == "info":
                     logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[INFO]," + proc + "," + content + "\n")
                     logfile.flush()
-                elif msgtype == "debug":
+                elif msgtype == "debug1":
                     pass
                     #logfile.write(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ",[DEBUG]," + proc + "," + content + "\n")
                     #logfile.flush()

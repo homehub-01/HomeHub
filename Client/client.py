@@ -98,6 +98,7 @@ class Client:
                     except Exception:
                         pass
                     self._sock = None
+            time.sleep(0.01)
 
     def send(self, toprocess, *args):
         payload = ','.join([str(self.process), str(toprocess)] + [str(a) for a in args]) + "\\SPLIT"

@@ -60,32 +60,40 @@ class Client:
                 return False
             
     def _send_loop(self):
-        while True:
-            if not self._tx_queue.empty():
-                """
-                同期的に送信する。接続がなければ接続を試みる（timeout 秒待つ）。
-                引数は文字列化してカンマ区切りで送信する。
-                例: send("other", "CMD", "arg1")
-                戻り値: True=送信成功, False=失敗
-                """
-                deadline = time.time() + 5.0
-                # 接続を確立する試行
-                while time.time() < deadline:
-                    if self._ensure_connected():
-                        break
-                    time.sleep(0.2)
-                else:
-                    pass
+        pending = None
+        while not self._stop_ev.is_set():
+            if pending is None:
                 try:
-                    payload = self._tx_queue.get()
-                    self._sock.sendall(payload.encode())
+                    pending = self._tx_queue.get(timeout=0.1)
+                except queue.Empty:
+                    continue
+            """
+            同期的に送信する。接続がなければ接続を試みる（timeout 秒待つ）。
+            引数は文字列化してカンマ区切りで送信する。
+            例: send("other", "CMD", "arg1")
+            戻り値: True=送信成功, False=失敗
+            """
+            deadline = time.time() + 5.0
+            # 接続を確立する試行
+            while time.time() < deadline and not self._stop_ev.is_set():
+                if self._ensure_connected():
+                    break
+                time.sleep(0.2)
+
+            if not self._sock:
+                time.sleep(0.2)
+                continue
+
+            try:
+                self._sock.sendall(pending.encode())
+                pending = None
+            except Exception:
+                try:
+                    self._sock.close()
                 except Exception:
-                    try:
-                        self._sock.close()
-                    except Exception:
-                        pass
-                    self._sock = None
-            time.sleep(0.01)
+                    pass
+                self._sock = None
+                time.sleep(0.2)
 
     def send(self, toprocess, *args):
         payload = ','.join([str(self.process), str(toprocess)] + [str(a) for a in args]) + "\\SPLIT"
@@ -143,6 +151,7 @@ class Client:
                     except Exception:
                         pass
                     self._sock = None
+                buf = ""
 
             if not self.reconnect:
                 break

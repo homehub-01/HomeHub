@@ -4,7 +4,7 @@ import psutil
 import subprocess
 import sys
 
-def start_process():
+def start_process(serverinfo):
     # プロセスを起動し、ハートビートに登録する
     def boot_process(process_name, module_name):
         try:
@@ -30,7 +30,7 @@ def start_process():
     return pids
 
 
-if __name__ == '__main__':
+def main():
     '''サーバーの起動'''
     serverinfo  = Server.Start()
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     subprocess.Popen(["python", "-m", 'HeartBeat.main'])
 
     '''各プロセスの起動'''
-    pids = start_process()
+    pids = start_process(serverinfo)
 
     while True:
         # サーバー自身の受信キューをチェック
@@ -60,6 +60,10 @@ if __name__ == '__main__':
                     except Exception as e:
                         Server.send(serverinfo, "logger", "error", "BSW", f"Failed to terminate process {process}: {e}")
                 time.sleep(2)
-                pids = start_process()
+                pids = start_process(serverinfo)
         time.sleep(0.5)
+
+
+if __name__ == '__main__':
+    main()
 

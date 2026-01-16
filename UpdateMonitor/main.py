@@ -10,9 +10,12 @@ class AppInfo:
     apphash = {}
     rebootrequired = False
 
-def update_from_git(appinfo, repo_path):
+def update_from_git(client, appinfo, repo_path):
     """指定されたリポジトリの最新のコミットハッシュを取得する"""
-    subprocess.run(["git","-C", repo_path, "fetch"])
+    fetch = subprocess.run(["git", "-C", repo_path, "fetch"], capture_output=True, text=True)
+    if fetch.returncode != 0:
+        client.send("logger", "error", "UPDATEMONITOR", f"Failed to fetch {repo_path}: {fetch.stderr.strip()}")
+        return
     result = subprocess.run(
         ["git", "-C", repo_path, "rev-parse", "origin/develop"],
         capture_output=True,
@@ -30,24 +33,27 @@ def update_from_git(appinfo, repo_path):
         appinfo.rebootrequired = True
         client.send("logger", "info", "UPDATEMONITOR", f"App {repo_path} updated to hash {latest_hash}. Reboot required.")
 
-if __name__ == "__main__":
-    client = client.Client(process="updatemonitor")
+def main():
+    client_inst = client.Client(process="updatemonitor")
     appinfo = AppInfo()
     json_path = "APPHash.json"
     if not Path(json_path).exists():
-        with Path(json_path).open("r", encoding="utf-8") as f:
+        with Path(json_path).open("w", encoding="utf-8") as f:
             json.dump({}, f, ensure_ascii=False, indent=2)
-    appinfo.apphash = json.load(open(json_path, "r", encoding="utf-8"))
+    try:
+        appinfo.apphash = json.load(open(json_path, "r", encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        appinfo.apphash = {}
     reloadtime = 0
     threads = queue.Queue()
     updateflag = True
     forced_update = False
     while True:
-        if not client._rx_queue.empty():
-            msg = client._rx_queue.get()
+        if not client_inst._rx_queue.empty():
+            msg = client_inst._rx_queue.get()
             if len(msg.split(',')) == 1:
                 if msg == "HEARTBEAT":
-                    client.send("heartbeat", "ALIVE","updatemonitor")
+                    client_inst.send("heartbeat", "ALIVE","updatemonitor")
                 elif msg == "update":
                     forced_update = True
         if time.time() - reloadtime > 1500 or forced_update:
@@ -58,20 +64,24 @@ if __name__ == "__main__":
                 if thread.is_alive():
                     updateflag = False
                     threads.put(thread)
-                    client.send("logger", "warning", "UPDATEMONITOR", "Update thread still running, skipping this cycle.")
+                    client_inst.send("logger", "warning", "UPDATEMONITOR", "Update thread still running, skipping this cycle.")
                     break
             if threads.empty():
                 updateflag = True
             if updateflag:
                 for app in appinfo.apphash.keys():
-                    updatethread = threading.Thread(target=update_from_git, args=(appinfo,app,))
+                    updatethread = threading.Thread(target=update_from_git, args=(client_inst, appinfo, app,))
                     updatethread.start()
                     threads.put(updatethread)
         if appinfo.rebootrequired:
-            client.send("logger", "info", "UPDATEMONITOR", "Reboot required due to app updates. Sending REBOOT command to server.")
+            client_inst.send("logger", "info", "UPDATEMONITOR", "Reboot required due to app updates. Sending REBOOT command to server.")
             appinfo.rebootrequired = False
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(appinfo.apphash, f, ensure_ascii=False, indent=2)
-            client.send("server", "REBOOT")
+            client_inst.send("server", "REBOOT")
         time.sleep(1)
+
+
+if __name__ == "__main__":
+    main()
         

@@ -9,6 +9,7 @@ class ServeInfo:
     tx_queue = queue.Queue()
     me_rx_queue = queue.Queue()
     addrsbook = {"server": None}   # process_name -> conn
+    max_retry = 5
 
 def Start():
     serverinfo = ServeInfo()
@@ -22,7 +23,7 @@ def Start():
     return serverinfo
 
 def send(serverinfo: ServeInfo, toprocess: str, *args):
-    serverinfo.rx_queue.put((','.join(['server', toprocess] + [str(a) for a in args]), None))
+    serverinfo.rx_queue.put((','.join(['server', toprocess] + [str(a) for a in args]), None, 0))
 
 def accept_loop(serverinfo: ServeInfo):
     while True:
@@ -44,7 +45,7 @@ def client_handler(serverinfo: ServeInfo, conn: socket.socket, addr):
                 message, buf = buf.split("\\SPLIT", 1)
                 if not message:
                     continue
-                serverinfo.rx_queue.put((message, conn))
+                serverinfo.rx_queue.put((message, conn, 0))
     except Exception:
         pass
     finally:
@@ -82,7 +83,12 @@ def sorting(serverinfo: ServeInfo):
     while True:
         try:
             if not serverinfo.rx_queue.empty():
-                message, conn = serverinfo.rx_queue.get()
+                item = serverinfo.rx_queue.get()
+                if len(item) == 3:
+                    message, conn, retry = item
+                else:
+                    message, conn = item
+                    retry = 0
                 parts = message.split(',')
                 if len(parts) < 2:
                     continue
@@ -105,8 +111,9 @@ def sorting(serverinfo: ServeInfo):
                 
                 else:
                     # 未登録なら後ろへ戻す（短い遅延を入れて無限ループを避ける）
-                    time.sleep(0.05)
-                    serverinfo.rx_queue.put((message, conn))
+                    if retry < serverinfo.max_retry:
+                        time.sleep(0.05)
+                        serverinfo.rx_queue.put((message, conn, retry + 1))
         except Exception:
             pass
         time.sleep(0.01)

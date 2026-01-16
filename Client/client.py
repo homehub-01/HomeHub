@@ -12,21 +12,8 @@ class Client:
         reconnect: 接続が切れたら再接続する場合は True
         """
         self.process = process
-        # 自PCのIPを自動検出（失敗時はループバックアドレスを使用）
-        s = None
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            # 到達必須ではない外部アドレスへ接続することでローカルIPを取得
-            s.connect(('8.8.8.8', 80))
-            self.host = s.getsockname()[0]
-        except Exception:
-            self.host = '127.0.0.1'
-        finally:
-            if s:
-                try:
-                    s.close()
-                except Exception:
-                    pass
+        # ローカルホストに固定
+        self.host = '127.0.0.1'
         self.port = port
         self.on_message = on_message
         self.reconnect = reconnect
@@ -117,6 +104,7 @@ class Client:
 
     def _receiver_loop(self):
         """受信専用スレッド。接続が切れたら reconnect 設定によって再接続を試みる"""
+        buf = ""
         while not self._stop_ev.is_set():
             if not self._ensure_connected():
                 if self.reconnect:
@@ -132,14 +120,18 @@ class Client:
                     if not data:
                         # 切断
                         break
-                    text = data.decode(errors='ignore')
-                    self._rx_queue.put(text)
-                    # コールバック呼び出し（例外は無視）
-                    if self.on_message:
-                        try:
-                            self.on_message(text)
-                        except Exception:
-                            pass
+                    buf += data.decode(errors='ignore')
+                    while "\\SPLIT" in buf:
+                        msg, buf = buf.split("\\SPLIT", 1)
+                        if not msg:
+                            continue
+                        self._rx_queue.put(msg)
+                        # コールバック呼び出し（例外は無視）
+                        if self.on_message:
+                            try:
+                                self.on_message(msg)
+                            except Exception:
+                                pass
             except Exception:
                 pass
             finally:

@@ -34,12 +34,17 @@ def accept_loop(serverinfo: ServeInfo):
 
 def client_handler(serverinfo: ServeInfo, conn: socket.socket, addr):
     try:
+        buf = ""
         while True:
             data = conn.recv(1024)
             if not data:
                 break
-            message = data.decode()
-            serverinfo.rx_queue.put((message, conn))
+            buf += data.decode(errors="ignore")
+            while "\\SPLIT" in buf:
+                message, buf = buf.split("\\SPLIT", 1)
+                if not message:
+                    continue
+                serverinfo.rx_queue.put((message, conn))
     except Exception:
         pass
     finally:
@@ -58,7 +63,8 @@ def tx(serverinfo: ServeInfo):
             if not serverinfo.tx_queue.empty():
                 conn, command = serverinfo.tx_queue.get()
                 try:
-                    conn.sendall(','.join(command).encode())
+                    payload = ','.join(command) + "\\SPLIT"
+                    conn.sendall(payload.encode())
                 except Exception:
                     # 送信失敗時は接続を閉じて登録削除
                     to_remove = [k for k, v in serverinfo.addrsbook.items() if v is conn]
@@ -77,11 +83,7 @@ def sorting(serverinfo: ServeInfo):
         try:
             if not serverinfo.rx_queue.empty():
                 message, conn = serverinfo.rx_queue.get()
-                sp_message = message.split("\\SPLIT")
-                if len(sp_message) > 1:
-                    for i in range(1, len(sp_message),1):
-                        serverinfo.rx_queue.put(sp_message[i])
-                parts = sp_message[0].split(',')
+                parts = message.split(',')
                 if len(parts) < 2:
                     continue
                 fromprocess = parts[0]
